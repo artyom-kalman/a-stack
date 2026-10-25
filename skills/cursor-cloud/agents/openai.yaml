@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cursor Cloud"
+  short_description: "Delegate bounded tasks and review cloud delivery"
+  default_prompt: "Use $cursor-cloud to hand off this task and review its draft PR."

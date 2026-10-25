@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Build Profiles — decisions</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+  /* Editorial v2 — design memo / technical broadsheet. Ink on warm paper, vermillion accent. */
+  :root {
+    --bg: #f1ebdf;
+    --panel: #fbf7ee;
+    --panel-2: #ece2cf;
+    --border: #dccfb6;
+    --border-soft: #e7dcc7;
+    --fg: #231e18;
+    --fg-2: #4b4238;
+    --muted: #8a7a61;
+    --muted-2: #b3a385;
+    --accent: #c0451c;
+    --accent-fg: #fdf6ec;
+    --green: #5a7a24;
+    --amber: #a9781a;
+    --red: #b03325;
+    --purple: #6f5aa3;
+    --chip: #ece2cf;
+    --radius: 4px;
+    --radius-lg: 6px;
+    --shadow: 0 10px 34px rgba(70,50,25,.12);
+    --sans: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --display: "Fraunces", Georgia, serif;
+  }
+  /* ===== shared structural CSS — themes supply tokens + overrides ===== */
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); line-height: 1.55; font-size: 15px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 28px 140px; }
+  h1 { font-family: var(--display); font-size: 30px; letter-spacing: -0.02em; margin: 0 0 6px; font-weight: 700; }
+  h2 { font-family: var(--display); font-size: 21px; letter-spacing: -0.01em; margin: 56px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border-soft); font-weight: 700; }
+  h3 { font-size: 16px; margin: 0 0 4px; font-weight: 650; }
+  p { margin: 0 0 12px; color: var(--fg-2); }
+  .lede { color: var(--muted); font-size: 16px; margin-bottom: 4px; }
+  a { color: var(--accent); text-decoration: none; }
+  code, .mono { font-family: var(--mono); font-size: 0.88em; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; vertical-align: middle; }
+  .pill.s { background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--green); }
+  .pill.m { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber); }
+  .pill.l { background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+  .tag { font-family: var(--mono); font-size: 11px; color: var(--muted-2); }
+
+  .callout { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 18px; margin: 18px 0; }
+  .callout.rule { border-left-color: var(--purple); }
+  .callout.locked { border-left-color: var(--green); }
+  .callout ul { margin: 8px 0 0; padding-left: 18px; }
+  .callout li { margin: 3px 0; font-size: 14px; color: var(--fg-2); }
+
+  /* ---- matrix / UI mock ---- */
+  .mock { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg); margin: 14px 0 6px; font-size: 12px; position: relative; }
+  .mock .hdr { height: 30px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--muted); }
+  .mock .hdr .crumb { color: var(--fg); font-weight: 600; }
+  .mock .hdr .sep { color: var(--muted-2); }
+  .mock .hdr .path { font-family: var(--mono); background: var(--chip); padding: 1px 6px; border-radius: 4px; color: var(--muted); }
+
+  .mx { display: grid; }
+  .mx .toolbar { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; height: 30px; border-bottom: 1px solid var(--border); }
+  .mx .tcell { display: flex; align-items: center; gap: 6px; padding: 0 8px; border-right: 1px solid var(--border); }
+  .mx .tcell:last-child { border-right: 0; }
+  .mx .colhdr { display: flex; align-items: center; justify-content: center; gap: 4px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--panel-2); border-right: 1px solid var(--border); position: relative; }
+  .mx .colhdr:last-child { border-right: 0; }
+  .mx .colhdr .menu { color: var(--muted-2); cursor: default; }
+  .mx .colhdr .grab { color: var(--muted-2); font-size: 11px; }
+  .mx .addcol { display: flex; align-items: center; justify-content: center; color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, transparent); font-size: 14px; }
+
+  .mx .row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; height: 26px; border-bottom: 1px solid var(--border-soft); }
+  .mx .label { display: flex; align-items: center; gap: 6px; padding: 0 8px; color: var(--fg-2); border-right: 1px solid var(--border); }
+  .mx .label .ico { width: 12px; text-align: center; color: var(--muted-2); }
+  .mx .label.folder .ico { color: var(--accent); }
+  .mx .label.indent { padding-left: 22px; }
+  .mx .label.indent2 { padding-left: 36px; }
+  .mx .cell { display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--border-soft); }
+  .mx .cell:last-child { border-right: 0; }
+
+  .cb { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--muted-2); display: grid; place-items: center; font-size: 10px; font-weight: 900; }
+  .cb.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .cb.part { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); color: var(--accent); }
+  .cb.ro { opacity: .85; }
+
+  .pop { position: absolute; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); font-size: 12px; z-index: 5; }
+  .pop .ttl { font-weight: 600; color: var(--fg); padding: 9px 12px; border-bottom: 1px solid var(--border-soft); }
+  .pop .field { padding: 7px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .pop .field label { color: var(--muted-2); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+  .pop .inp { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 7px; color: var(--fg); }
+  .pop .sel { background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 4px 7px; color: var(--fg); display: flex; justify-content: space-between; }
+  .pop .actions { display: flex; justify-content: flex-end; gap: 6px; padding: 9px 12px; border-top: 1px solid var(--border-soft); }
+  .menupop { position: absolute; min-width: 130px; }
+  .menupop .mi { padding: 6px 12px; color: var(--fg-2); display: flex; align-items: center; gap: 7px; }
+  .menupop .mi:hover { background: var(--panel-2); }
+  .menupop .mi.danger { color: var(--red); }
+  .menupop .mi.dim { color: var(--muted-2); }
+  .menupop .div { height: 1px; background: var(--border-soft); margin: 4px 0; }
+
+  .btn { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; color: var(--muted); font-size: 11px; }
+  .btn.accent { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent); }
+  .btn.danger { background: color-mix(in srgb, var(--red) 14%, transparent); border-color: color-mix(in srgb, var(--red) 40%, transparent); color: var(--red); }
+
+  .toast { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow); }
+  .toast .u { color: var(--accent); font-weight: 600; }
+
+  .opt { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; margin: 22px 0; }
+  .opt .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .opt .head .k { font-family: var(--mono); color: var(--purple); font-weight: 700; }
+  .opt .head h3 { font-size: 18px; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  .pc ul { margin: 4px 0 0; padding-left: 18px; }
+  .pc li { margin: 3px 0; font-size: 13.5px; }
+  .pc .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted-2); }
+  .pro li::marker { color: var(--green); }
+  .con li::marker { color: var(--red); }
+  .reuse { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .reuse b { color: var(--fg); font-weight: 600; }
+  .small { font-size: 12.5px; color: var(--muted); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+  hr { border: 0; border-top: 1px solid var(--border-soft); margin: 28px 0; }
+
+  .rec { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: var(--radius-lg); padding: 16px 20px; margin: 16px 0; }
+
+  .cbox { margin: 14px 0 6px; }
+  .cbox label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted-2); margin-bottom: 5px; }
+  .cbox textarea { width: 100%; min-height: 64px; resize: vertical; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; color: var(--fg); font-family: var(--sans); font-size: 13.5px; line-height: 1.5; }
+  .cbox textarea:focus { outline: none; border-color: var(--accent); }
+  .cbox.decision textarea { border-left: 3px solid var(--green); }
+
+  /* style-name badge (added so each variant is identifiable) */
+  .stylebadge { position: fixed; top: 12px; right: 14px; z-index: 50; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; background: var(--panel); border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 999px; box-shadow: var(--shadow); }
+  /* ===== interactive engine: selection, comments, summary, copy bar ===== */
+  .qhead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .qhead .qn { font-family: var(--mono); font-size: 12px; color: var(--muted-2); font-weight: 700; }
+  .qstatus { margin-left: auto; font-family: var(--mono); font-size: 11px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted-2); background: var(--panel); }
+  .qstatus.done { color: var(--green); border-color: color-mix(in srgb, var(--green) 45%, transparent); background: color-mix(in srgb, var(--green) 12%, transparent); }
+
+  .opt { cursor: pointer; transition: border-color .12s ease, box-shadow .12s ease, transform .04s ease; position: relative; }
+  .opt:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+  .opt:active { transform: translateY(1px); }
+  .opt.sel { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent), var(--shadow); }
+  .opt .pick { width: 18px; height: 18px; border-radius: 999px; border: 2px solid var(--muted-2); display: inline-grid; place-items: center; flex: none; transition: border-color .12s; }
+  .opt:hover .pick { border-color: var(--accent); }
+  .opt.sel .pick { border-color: var(--accent); }
+  .opt.sel .pick::after { content: ""; width: 9px; height: 9px; border-radius: 999px; background: var(--accent); }
+  .opt .keyhint { font-family: var(--mono); font-size: 10px; color: var(--muted-2); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; line-height: 15px; }
+  .recbadge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); padding: 1px 7px; border-radius: 999px; }
+
+  /* "needs more info" slim option */
+  .opt.meta { padding: 12px 18px; background: transparent; border-style: dashed; }
+  .opt.meta .head h3 { font-size: 14px; font-weight: 500; color: var(--muted); }
+
+  .cbox textarea { transition: border-color .12s; }
+  .cbox.filled textarea { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+
+  /* live summary block */
+  #summary .sumrow { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 12px 16px; margin: 10px 0; }
+  #summary .sumrow .sq { font-weight: 600; font-size: 14px; }
+  #summary .sumrow .sa { margin-top: 4px; font-size: 14px; }
+  #summary .sumrow .sa .pickname { color: var(--accent); font-weight: 600; }
+  #summary .sumrow .sa.none { color: var(--muted-2); font-style: italic; }
+  #summary .sumrow .sc { margin-top: 6px; font-size: 13px; color: var(--fg-2); white-space: pre-wrap; border-left: 2px solid var(--border); padding-left: 10px; }
+  #summary .sumrow .sc.empty { display: none; }
+
+  /* sticky action bar */
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: color-mix(in srgb, var(--panel) 88%, transparent); backdrop-filter: blur(8px); border-top: 1px solid var(--border); }
+  .bar .inner { max-width: 1080px; margin: 0 auto; padding: 11px 28px; display: flex; align-items: center; gap: 12px; }
+  .bar .prog { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .bar .prog b { color: var(--fg); }
+  .bar .track { width: 120px; height: 6px; border-radius: 999px; background: var(--panel-2); overflow: hidden; border: 1px solid var(--border); }
+  .bar .track i { display: block; height: 100%; background: var(--accent); transition: width .2s ease; }
+  .bar .spacer { flex: 1; }
+  .abtn { font-family: var(--sans); font-size: 13px; font-weight: 500; border-radius: 8px; padding: 7px 14px; border: 1px solid var(--border); background: var(--panel); color: var(--fg); cursor: pointer; transition: background .12s, border-color .12s; }
+  .abtn:hover { border-color: var(--accent); }
+  .abtn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .abtn.primary:hover { filter: brightness(1.06); }
+  .abtn.ghost { background: transparent; color: var(--muted); }
+
+  .copied { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%) translateY(8px); opacity: 0; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 999px; box-shadow: var(--shadow); transition: opacity .18s, transform .18s; z-index: 60; }
+  .copied.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* ===== editorial-v2 character layer (loads after shared + engine) ===== */
+
+  /* paper grain + warmth */
+  body { position: relative; }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+    opacity: .35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+  .wrap { max-width: 940px; }
+
+  /* ---- masthead ---- */
+  .tag { display: inline-block; text-transform: uppercase; letter-spacing: .22em; font-size: 10.5px; color: var(--muted); padding-bottom: 14px; }
+  h1 { font-optical-sizing: auto; font-weight: 600; font-size: clamp(34px, 5vw, 52px); line-height: 1.02; letter-spacing: -0.018em; margin-bottom: 12px; }
+  .lede { font-size: 17px; line-height: 1.5; color: var(--fg-2); max-width: 64ch; padding-bottom: 22px; border-bottom: 3px double var(--border); }
+
+  /* ---- section rules + numbering ---- */
+  h2 { font-weight: 600; font-size: 25px; letter-spacing: -0.012em; border-bottom: 0; padding-bottom: 0; margin: 60px 0 8px; }
+  h2 .qhead { width: 100%; align-items: baseline; }
+  h2 .qhead .qn { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 20px; color: var(--accent); letter-spacing: 0; }
+  h2 .qhead > span:nth-child(2) { padding-left: 2px; }
+  .question { position: relative; padding-top: 18px; }
+  .question::before { content: ""; position: absolute; top: 0; left: 0; width: 64px; height: 2px; background: var(--accent); }
+
+  .qstatus { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 3px 10px; }
+
+  .lede + * { margin-top: 30px; }
+  .callout { background: color-mix(in srgb, var(--panel) 70%, transparent); border-radius: var(--radius); }
+  .callout.locked strong { font-family: var(--display); font-weight: 600; font-style: italic; }
+
+  /* ---- option cards as marked-up clippings ---- */
+  .opt { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 1px 0 var(--border-soft); transition: border-color .14s, box-shadow .14s, background .14s, transform .05s; }
+  .opt:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); box-shadow: var(--shadow); }
+  .opt .head .k { font-family: var(--display); font-weight: 600; font-style: italic; color: var(--accent); font-size: 17px; }
+  .opt .head h3 { font-family: var(--display); font-weight: 600; letter-spacing: -0.01em; }
+  .opt .pick { border-radius: 999px; }
+
+  /* selected = clipped & stamped */
+  .opt.sel { background: color-mix(in srgb, var(--accent) 6%, var(--panel)); border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent), var(--shadow); }
+  .opt.sel .head::after {
+    content: "✓ chosen"; margin-left: auto; align-self: center;
+    font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent-fg); background: var(--accent); padding: 3px 9px; border-radius: 2px;
+    transform: rotate(-1.5deg);
+  }
+  .opt .keyhint { border-radius: 3px; }
+  .opt.meta { background: transparent; box-shadow: none; }
+  .opt.meta .head h3 { font-family: var(--display); font-style: italic; }
+
+  /* ---- "my lean" as an editor's margin note ---- */
+  .rec { background: transparent; border: 0; border-left: 2px solid var(--accent); border-radius: 0; padding: 4px 0 4px 16px; margin: 18px 0 6px; font-family: var(--display); font-style: italic; font-size: 16px; color: var(--fg-2); position: relative; }
+  .rec::before { content: "My lean"; display: block; font-family: var(--mono); font-style: normal; font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+  .rec b { display: none; }
+
+  /* recommended badge → quiet ribbon */
+  .recbadge { font-family: var(--mono); border-radius: 2px; }
+
+  /* ---- comment boxes feel like ruled paper ---- */
+  .cbox label { font-family: var(--mono); letter-spacing: .12em; }
+  .cbox textarea { background: var(--bg); border-radius: var(--radius); font-family: var(--sans); }
+  .cbox.decision textarea { border-left: 3px solid var(--accent); }
+
+  /* ---- summary as a typeset receipt ---- */
+  #summary .sumrow { border-radius: var(--radius); }
+  #summary .sumrow .sq { font-family: var(--display); font-weight: 600; }
+  #summary .sumrow .sa .pickname { color: var(--accent); }
+
+  /* ---- action bar as a printed footer ---- */
+  .bar { background: color-mix(in srgb, var(--panel) 92%, transparent); border-top: 2px solid var(--fg); }
+  .bar .prog { font-family: var(--mono); letter-spacing: .06em; }
+  .abtn { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; border-radius: var(--radius); }
+  .abtn.primary { box-shadow: 2px 2px 0 var(--fg); }
+  .abtn.primary:hover { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--fg); }
+  .stylebadge { font-family: var(--mono); letter-spacing: .1em; border-radius: 2px; }
+  .copied { font-family: var(--mono); border-radius: 3px; letter-spacing: .04em; }
+
+  /* ---- staggered page-load reveal ---- */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .tag, h1, .lede, .callout, #root > h3, #root > .mock, #root > .legend, .question {
+    animation: rise .55s cubic-bezier(.2,.7,.2,1) both;
+  }
+  h1 { animation-delay: .04s; }
+  .lede { animation-delay: .09s; }
+  .callout { animation-delay: .14s; }
+  #root > h3 { animation-delay: .18s; }
+  #root > .mock { animation-delay: .22s; }
+  .question:nth-of-type(1) { animation-delay: .26s; }
+  .question:nth-of-type(2) { animation-delay: .32s; }
+  .question:nth-of-type(3) { animation-delay: .38s; }
+  .question:nth-of-type(4) { animation-delay: .44s; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="root"></div>
+<div class="bar"><div class="inner"><span class="prog" id="prog"></span><span class="track"><i id="track"></i></span><span class="spacer"></span><button class="abtn ghost" id="resetBtn">Reset</button><button class="abtn" id="copyMd">Copy as Markdown</button><button class="abtn primary" id="copyPlain">Copy summary</button></div></div>
+<div class="copied" id="copied"></div>
+<script>
+// ============================ CONTENT (DOC) ============================
+const DOC = {
+  id: "profile-crud",
+  meta: "scoping draft · not a spec",
+  title: "Build Profiles — CRUD & folders",
+  subtitle: "v1 ships a read-only-ish matrix: toggle single leaves, profiles come only from seed. Next: manage the profiles themselves, and include whole folders. Click the option you want per question, add comments, then hit Copy summary.",
+  locked: [
+    "<b>Drop <code>slug</code></b> → single <code>name</code> field. Matrix header shows the name; seed re-keys on it.",
+    "<b>Folder inclusion = Model A (store leaves).</b> Toggling a folder writes/removes a member for every descendant leaf. Maps to canonical <code>included_resources</code>.",
+    "<b>Folder tri-state:</b> <code>none → all</code>, <code>all → none</code>, <code>partial → all</code>.",
+    "<b>Descendants resolved server-side</b>, reusing the delete-guard resolver. New <code>setFolderMembership</code> mutation.",
+    "Schema fields (<code>delivery_mode</code>, <code>build_flags</code>, <code>configs</code>…) stay deferred per ADR-0005.",
+  ],
+  preview: {
+    title: "What the matrix looks like with folder inclusion live",
+    mock: `<div class="mock">
+      <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span>Browser</span><span class="sep">/</span><span class="path">content/</span></div>
+      <div class="mx" style="grid-template-columns: 240px repeat(3, 78px);">
+        <div class="toolbar">
+          <div class="tcell"><span class="btn">+ New</span></div>
+          <div class="colhdr">iOS App Store</div><div class="colhdr">Google Play</div><div class="colhdr">Steam</div>
+        </div>
+        <div class="row"><div class="label folder"><span class="ico">▾</span> ui</div><div class="cell"><span class="cb part">–</span></div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div></div>
+        <div class="row"><div class="label indent"><span class="ico">≡</span> start_screen</div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div></div>
+        <div class="row"><div class="label indent"><span class="ico">≡</span> pause_menu</div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div></div>
+        <div class="row"><div class="label folder"><span class="ico">▾</span> images</div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"><span class="cb on">✓</span></div></div>
+        <div class="row"><div class="label indent"><span class="ico">▦</span> bg_forest</div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"><span class="cb on">✓</span></div></div>
+      </div>
+    </div>`,
+    legend: `<span><span class="cb on" style="display:inline-grid;width:13px;height:13px;vertical-align:middle">✓</span> included</span><span><span class="cb part" style="display:inline-grid;width:13px;height:13px;vertical-align:middle">–</span> partial</span><span><span class="cb" style="display:inline-grid;width:13px;height:13px;vertical-align:middle">&nbsp;</span> not included</span><span>· folders now clickable</span>`,
+  },
+  questions: [
+    {
+      id: "q1", title: "Where do create / rename / delete live?",
+      intro: "<p>Profiles currently exist only from seed. We need a surface to add, rename, and remove the profile <em>columns</em>.</p>",
+      recommend: "1A", recommendNote: "A profile is just name/OS/store; the matrix is the natural home, and it's the smaller build.",
+      options: [
+        { id: "1A", title: "Inline — “+” column + per-header menu", size: "S",
+          desc: "<p class='small'>A trailing <b>+</b> column opens a small create dialog. Each column header carries a <b>⋯</b> menu → Rename / Delete. Everything stays in the matrix.</p>",
+          mock: `<div class="mock">
+            <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span class="path">content/</span></div>
+            <div class="mx" style="grid-template-columns: 200px repeat(3, 74px) 40px;">
+              <div class="toolbar"><div class="tcell"><span class="btn">+ New</span></div><div class="colhdr">iOS App Store <span class="menu">⋯</span></div><div class="colhdr">Google Play <span class="menu">⋯</span></div><div class="colhdr">Steam <span class="menu">⋯</span></div><div class="addcol">+</div></div>
+              <div class="row"><div class="label folder"><span class="ico">▸</span> ui</div><div class="cell"><span class="cb part">–</span></div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"></div></div>
+              <div class="row"><div class="label folder"><span class="ico">▸</span> images</div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"><span class="cb on">✓</span></div><div class="cell"></div></div>
+            </div>
+            <div class="pop" style="top:62px; right:14px; width:210px;">
+              <div class="ttl">New profile</div>
+              <div class="field"><label>Name</label><div class="inp">Amazon Appstore</div></div>
+              <div class="field"><label>Target OS</label><div class="sel">android <span>▾</span></div></div>
+              <div class="field"><label>Store</label><div class="sel">none <span>▾</span></div></div>
+              <div class="actions"><span class="btn">Cancel</span><span class="btn accent">Create</span></div>
+            </div>
+          </div>`,
+          pros: ["One surface — manage columns where you use them.", "Cheapest build; reuses existing dialog primitives.", "Scales horizontally with column count naturally."],
+          cons: ["Cramped if a profile grows many editable fields.", "Header menus add per-column chrome.", "Many profiles → horizontal scroll to reach “+”."],
+          reuse: "Existing dialog/menu shadcn primitives; <code>F2</code>-style rename already in the tree." },
+        { id: "1B", title: "Dedicated manage panel", size: "M",
+          desc: "<p class='small'>A separate “Manage profiles” surface (drawer/page): a list with full edit rows. Matrix stays toggle-only. Headroom for OS/store/(later) fields without cramping the grid.</p>",
+          mock: `<div class="mock">
+            <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span>Manage profiles</span></div>
+            <div style="padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 12px;"><span style="font-family:var(--mono);color:var(--muted-2)">⠿</span><span style="font-weight:600">iOS App Store</span><span class="pill" style="background:var(--chip);color:var(--muted)">ios · app_store</span><span style="margin-left:auto" class="btn">Rename</span><span class="btn danger">Delete</span></div>
+              <div style="display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 12px;"><span style="font-family:var(--mono);color:var(--muted-2)">⠿</span><span style="font-weight:600">Google Play</span><span class="pill" style="background:var(--chip);color:var(--muted)">android · google_play</span><span style="margin-left:auto" class="btn">Rename</span><span class="btn danger">Delete</span></div>
+              <div style="margin-top:4px"><span class="btn accent">+ New profile</span></div>
+            </div>
+          </div>`,
+          pros: ["Room for more fields as the schema fills in.", "Reorder via drag fits naturally in a list.", "Keeps the matrix purely about membership."],
+          cons: ["More to build; a whole new surface + route/drawer.", "Context switch away from the matrix to add a column.", "Overkill while a profile is just name/OS/store."],
+          reuse: "Could mount in the empty right pane." },
+      ],
+    },
+    {
+      id: "q2", title: "Reorder columns",
+      intro: "<p>Order controls left-to-right column placement (the <code>order</code> field). Worth it now, or defer?</p>",
+      recommend: "2A", recommendNote: "Drag isn't worth it while there are a handful of profiles; 2B if you want it now.",
+      options: [
+        { id: "2A", title: "Skip for now", size: "S",
+          desc: "<p class='small'>New profiles append to the end. No reorder UI. Leanest.</p>", mock: "",
+          pros: ["Zero extra code.", "Order still exists in data; add UI later."],
+          cons: ["Stuck with creation order until a follow-up."] },
+        { id: "2B", title: "Move left / right in the header menu", size: "S–M",
+          desc: "<p class='small'>The same <b>⋯</b> menu gains Move left / Move right. No drag code; swaps <code>order</code>.</p>",
+          mock: `<div class="mock">
+            <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span class="path">content/</span></div>
+            <div class="mx" style="grid-template-columns: 200px repeat(3, 74px);">
+              <div class="toolbar"><div class="tcell"></div><div class="colhdr">iOS App Store</div><div class="colhdr" style="background:color-mix(in srgb, var(--accent) 14%, transparent)">Google Play <span class="menu" style="color:var(--accent)">⋯</span></div><div class="colhdr">Steam</div></div>
+              <div class="row"><div class="label folder"><span class="ico">▸</span> ui</div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"><span class="cb on">✓</span></div><div class="cell"><span class="cb">&nbsp;</span></div></div>
+            </div>
+            <div class="pop menupop" style="top:62px; left:286px;"><div class="mi">✎ Rename</div><div class="mi">← Move left</div><div class="mi">Move right →</div><div class="div"></div><div class="mi danger">🗑 Delete</div></div>
+          </div>`,
+          pros: ["Simple; folds into the 1A menu.", "No dnd library or pointer math."],
+          cons: ["Clunky to move far across many columns.", "Less discoverable than dragging."] },
+        { id: "2C", title: "Drag column headers", size: "M",
+          desc: "<p class='small'>Grab a header and drag to reposition. Most intuitive; most code (pointer/dnd + reindex).</p>",
+          mock: `<div class="mock">
+            <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span class="path">content/</span></div>
+            <div class="mx" style="grid-template-columns: 200px repeat(3, 74px);">
+              <div class="toolbar"><div class="tcell"></div><div class="colhdr"><span class="grab">⠿</span> iOS App Store</div><div class="colhdr" style="opacity:.4; border:1px dashed var(--accent)">drop here</div><div class="colhdr">Steam</div></div>
+              <div class="row"><div class="label folder"><span class="ico">▸</span> ui</div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"></div><div class="cell"><span class="cb">&nbsp;</span></div></div>
+            </div>
+            <div class="pop" style="top:40px; left:300px; width:96px; opacity:.92; padding:5px 8px; border-color:var(--accent); font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--accent); text-transform:uppercase;">Google Play</div>
+          </div>`,
+          pros: ["Most intuitive; instant any-position move.", "Polished, matches modern matrix UIs."],
+          cons: ["Most code; drag vs click-to-toggle conflicts to guard.", "Touch/keyboard a11y needs care."] },
+      ],
+    },
+    {
+      id: "q3", title: "Delete a profile — how safe?",
+      intro: "<p>Deleting a profile removes the column and all its membership ticks. Nothing references a profile, so no server guard — only the UX safety choice.</p>",
+      recommend: "3B", recommendNote: "Best feel if the Browser's undo infra is reusable; otherwise 3A. Avoid 3C.",
+      options: [
+        { id: "3A", title: "Confirm dialog", size: "S",
+          desc: "<p class='small'>A modal showing the blast radius. Explicit, hard to misfire.</p>",
+          mock: `<div class="mock" style="min-height:150px;">
+            <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span class="path">content/</span></div>
+            <div style="height:120px; opacity:.4;"></div>
+            <div class="pop" style="top:46px; left:50%; transform:translateX(-50%); width:280px;"><div class="ttl">Delete profile “Steam”?</div><div style="padding:10px 12px; color:var(--muted); font-size:12.5px;">Removes the column and its <b style="color:var(--fg)">14</b> included resources. Can't be undone.</div><div class="actions"><span class="btn">Cancel</span><span class="btn danger">Delete</span></div></div>
+          </div>`,
+          pros: ["Safest; shows the blast radius."], cons: ["Extra click; modal interrupts."] },
+        { id: "3B", title: "Delete + undo toast", size: "S–M",
+          desc: "<p class='small'>Deletes immediately; a toast offers Undo for ~6s. Matches the Browser's existing undo/redo feel.</p>",
+          mock: `<div class="mock" style="min-height:150px;">
+            <div class="hdr"><span class="crumb">HDN18</span><span class="sep">/</span><span class="path">content/</span></div>
+            <div class="mx" style="grid-template-columns: 220px repeat(2, 80px);"><div class="toolbar"><div class="tcell"></div><div class="colhdr">iOS App Store</div><div class="colhdr">Google Play</div></div><div class="row"><div class="label folder"><span class="ico">▸</span> ui</div><div class="cell"><span class="cb">&nbsp;</span></div><div class="cell"><span class="cb on">✓</span></div></div></div>
+            <div class="toast"><span>Deleted profile “Steam”</span><span class="u">Undo</span></div>
+          </div>`,
+          pros: ["Fast; consistent with existing undo model.", "Recoverable without a blocking modal."],
+          cons: ["Needs delete-with-restore (keep membership).", "Miss the toast → must re-create & re-tick."],
+          reuse: "Browser already has undo/redo for folder delete/rename — same pattern." },
+        { id: "3C", title: "Immediate, no confirm", size: "S",
+          desc: "<p class='small'>Just delete. Leanest. A misclick loses the column with no recovery.</p>", mock: "",
+          pros: ["Nothing to build."], cons: ["Destructive misclick = silent data loss."] },
+      ],
+    },
+    {
+      id: "q4", title: "Anything else?", type: "free",
+      intro: "<p class='small'>Open slots: empty-state CTA when a project has zero profiles · duplicate-name handling · should creating a profile pre-tick anything · matrix horizontal scroll with many columns.</p>",
+    },
+  ],
+};
+
+// ============================ ENGINE ============================
+const SKEY = "decide:" + DOC.id;
+const NEEDS = "__needs_info__";
+const state = load();
+let activeQ = null;
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(SKEY)) || {}; } catch { return {}; }
+}
+function save() { localStorage.setItem(SKEY, JSON.stringify(state)); }
+function ans(qid) { return state[qid] || (state[qid] = { pick: null, comment: "" }); }
+
+// pre-select recommendations (only if user has no saved pick)
+for (const q of DOC.questions) {
+  if (q.type === "free") { continue; }
+  if (q.recommend && (!state[q.id] || state[q.id].pick == null)) {
+    ans(q.id).pick = q.recommend;
+  }
+}
+
+const optQuestions = DOC.questions.filter((q) => q.type !== "free");
+const esc = (s) => String(s).replace(/&(?!amp;|lt;|gt;|#)/g, "&amp;");
+
+function render() {
+  const root = document.getElementById("root");
+  let h = "";
+  h += `<p class="tag">${DOC.meta}</p>`;
+  h += `<h1>${DOC.title}</h1>`;
+  h += `<p class="lede">${DOC.subtitle}</p>`;
+  if (DOC.locked?.length) {
+    h += `<div class="callout locked"><strong>Already decided (locked) — context, not up for debate:</strong><ul>${DOC.locked.map((l) => `<li>${l}</li>`).join("")}</ul></div>`;
+  }
+  if (DOC.preview) {
+    h += `<h3 style="margin-top:26px">${DOC.preview.title}</h3>${DOC.preview.mock}`;
+    if (DOC.preview.legend) { h += `<p class="legend">${DOC.preview.legend}</p>`; }
+  }
+
+  DOC.questions.forEach((q, qi) => {
+    h += `<section class="question" data-q="${q.id}">`;
+    h += `<h2><span class="qhead"><span class="qn">Q${qi + 1}</span><span>${q.title}</span><span class="qstatus" data-status="${q.id}">—</span></span></h2>`;
+    if (q.intro) { h += q.intro; }
+    if (q.type !== "free") {
+      q.options.forEach((o, oi) => {
+        h += optCard(q, o, oi + 1);
+      });
+      h += `<div class="opt meta" data-q="${q.id}" data-opt="${NEEDS}"><div class="head"><span class="pick"></span><h3>Needs more info / discuss</h3></div></div>`;
+      if (q.recommendNote) { h += `<div class="rec"><b>My lean:</b> ${q.recommendNote}</div>`; }
+    }
+    const cls = q.type === "free" ? "cbox" : "cbox decision";
+    h += `<div class="${cls}"><label>${q.type === "free" ? "Notes" : "Comments"}</label><textarea data-comment="${q.id}" placeholder="${q.type === "free" ? "anything else on your mind…" : "optional — caveats, tweaks, why…"}"></textarea></div>`;
+    h += `</section>`;
+  });
+
+  h += `<hr><h2>Your decisions — summary</h2><p class="small">Live preview of what Copy sends back.</p><div id="summary"></div>`;
+  h += `<div style="height:40px"></div>`;
+  root.innerHTML = h;
+
+  // restore comment values + wire
+  document.querySelectorAll("[data-comment]").forEach((ta) => {
+    const qid = ta.dataset.comment;
+    ta.value = ans(qid).comment || "";
+    ta.addEventListener("input", () => {
+      ans(qid).comment = ta.value;
+      ta.closest(".cbox").classList.toggle("filled", ta.value.trim().length > 0);
+      save(); paint();
+    });
+    ta.closest(".cbox").classList.toggle("filled", ta.value.trim().length > 0);
+    ta.addEventListener("focus", () => { activeQ = qid; });
+  });
+  document.querySelectorAll(".opt[data-opt]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const qid = el.dataset.q;
+      activeQ = qid;
+      ans(qid).pick = el.dataset.opt;
+      save(); paint();
+    });
+  });
+  document.querySelectorAll(".question").forEach((sec) => {
+    sec.addEventListener("mouseenter", () => { activeQ = sec.dataset.q; });
+  });
+  paint();
+}
+
+function optCard(q, o, n) {
+  const size = o.size ? `<span class="pill ${/^S/.test(o.size) ? "s" : /^M/.test(o.size) ? "m" : "l"}">${o.size}</span>` : "";
+  const rec = q.recommend === o.id ? `<span class="recbadge">recommended</span>` : "";
+  const pros = (o.pros || []).map((p) => `<li>${p}</li>`).join("");
+  const cons = (o.cons || []).map((c) => `<li>${c}</li>`).join("");
+  const pc = (pros || cons) ? `<div class="pc"><div class="pro"><div class="lbl">Pros</div><ul>${pros}</ul></div><div class="con"><div class="lbl">Cons</div><ul>${cons}</ul></div></div>` : "";
+  const reuse = o.reuse ? `<p class="reuse"><b>Reuse:</b> ${o.reuse}</p>` : "";
+  return `<div class="opt" data-q="${q.id}" data-opt="${o.id}">
+    <div class="head"><span class="pick"></span><span class="k">${o.id}</span><h3>${o.title}</h3>${size}${rec}<span class="keyhint">${n}</span></div>
+    ${o.desc || ""}${o.mock || ""}${pc}${reuse}</div>`;
+}
+
+function pickLabel(q, pid) {
+  if (pid === NEEDS) { return "Needs more info / discuss"; }
+  const o = q.options?.find((x) => x.id === pid);
+  return o ? `${o.id} — ${o.title}` : null;
+}
+
+function paint() {
+  // selection rings
+  document.querySelectorAll(".opt[data-opt]").forEach((el) => {
+    el.classList.toggle("sel", ans(el.dataset.q).pick === el.dataset.opt);
+  });
+  // per-question status
+  DOC.questions.forEach((q) => {
+    const badge = document.querySelector(`[data-status="${q.id}"]`);
+    if (!badge) { return; }
+    if (q.type === "free") {
+      const has = (ans(q.id).comment || "").trim().length > 0;
+      badge.textContent = has ? "noted" : "optional";
+      badge.classList.toggle("done", has);
+    } else {
+      const p = ans(q.id).pick;
+      badge.textContent = p ? "answered" : "pick one";
+      badge.classList.toggle("done", !!p);
+    }
+  });
+  // summary
+  const sum = document.getElementById("summary");
+  sum.innerHTML = DOC.questions.map((q, qi) => {
+    const a = ans(q.id);
+    let answer;
+    if (q.type === "free") {
+      answer = `<div class="sa none">free notes only</div>`;
+    } else {
+      const lab = a.pick ? pickLabel(q, a.pick) : null;
+      answer = lab ? `<div class="sa">→ <span class="pickname">${lab}</span></div>` : `<div class="sa none">→ not answered</div>`;
+    }
+    const c = (a.comment || "").trim();
+    return `<div class="sumrow"><div class="sq">Q${qi + 1} · ${q.title}</div>${answer}<div class="sc ${c ? "" : "empty"}">${esc(c)}</div></div>`;
+  }).join("");
+  // progress
+  const done = optQuestions.filter((q) => ans(q.id).pick).length;
+  const total = optQuestions.length;
+  document.getElementById("prog").innerHTML = `<b>${done}</b>/${total} answered`;
+  document.getElementById("track").style.width = (total ? (done / total) * 100 : 0) + "%";
+}
+
+function buildText(md) {
+  const L = [];
+  L.push(md ? `# ${DOC.title} — decisions` : `${DOC.title} — decisions`);
+  L.push("");
+  DOC.questions.forEach((q, qi) => {
+    const a = ans(q.id);
+    L.push(md ? `## Q${qi + 1} · ${q.title}` : `Q${qi + 1} · ${q.title}`);
+    if (q.type !== "free") {
+      const lab = a.pick ? pickLabel(q, a.pick) : "(not answered)";
+      L.push(md ? `- **Pick:** ${lab}` : `  → ${lab}`);
+    }
+    const c = (a.comment || "").trim();
+    if (c) { L.push(md ? `- Comment: ${c}` : `  comment: ${c}`); }
+    L.push("");
+  });
+  return L.join("\n").trim() + "\n";
+}
+
+function flash(msg) {
+  const t = document.getElementById("copied");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1400);
+}
+
+function copy(md) {
+  const missing = optQuestions.filter((q) => !ans(q.id).pick).length;
+  if (missing > 0 && !confirm(`${missing} question(s) not answered. Copy anyway?`)) { return; }
+  const text = buildText(md);
+  navigator.clipboard.writeText(text).then(
+    () => flash(md ? "Markdown copied" : "Summary copied"),
+    () => { prompt("Copy manually:", text); }
+  );
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") { return; }
+  if (!/^[1-9]$/.test(e.key) || !activeQ) { return; }
+  const q = DOC.questions.find((x) => x.id === activeQ);
+  if (!q || q.type === "free") { return; }
+  const idx = parseInt(e.key, 10) - 1;
+  if (idx < q.options.length) {
+    ans(activeQ).pick = q.options[idx].id;
+    save(); paint();
+  }
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  render();
+  document.getElementById("copyPlain").addEventListener("click", () => copy(false));
+  document.getElementById("copyMd").addEventListener("click", () => copy(true));
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if (!confirm("Clear all selections and comments?")) { return; }
+    localStorage.removeItem(SKEY);
+    for (const k of Object.keys(state)) { delete state[k]; }
+    for (const q of DOC.questions) {
+      if (q.type !== "free" && q.recommend) { ans(q.id).pick = q.recommend; }
+    }
+    render();
+  });
+});
+
+</script>
+</body>
+</html>

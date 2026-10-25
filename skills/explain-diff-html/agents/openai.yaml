@@ -1,0 +1,4 @@
+interface:
+  display_name: "Explain Diff (HTML)"
+  short_description: "Create interactive HTML code-change explainers"
+  default_prompt: "Use $explain-diff-html to explain the current branch changes."

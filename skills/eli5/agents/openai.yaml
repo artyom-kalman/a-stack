@@ -1,0 +1,4 @@
+interface:
+  display_name: "ELI5"
+  short_description: "Dead-simple picture explainer of how something works"
+  default_prompt: "Use $eli5 to explain the topic like I'm 5, as an HTML artifact with big pictures and few words."

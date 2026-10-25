@@ -1,0 +1,7 @@
+interface:
+  display_name: "Work on issue"
+  short_description: "Investigate or implement a tracked issue with evidence"
+  default_prompt: "Use $work-on-issue to gather context for this tracked issue, follow the requested scope, and stop if a stage finds a reason not to proceed."
+
+policy:
+  allow_implicit_invocation: true
