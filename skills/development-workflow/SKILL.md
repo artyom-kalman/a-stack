@@ -29,6 +29,10 @@ that existing context and authorization do not settle.
 For paid evaluations, state cases, candidates, scoring criteria, and estimated
 spend before bulk runs.
 
+For PR delivery, read [pr-presentation](../pr-presentation/SKILL.md) before
+verification so useful screenshots and recordings are captured during actual
+checks.
+
 Implement changes in an isolated environment using a worktree from `main`.
 Use relevant project setup, implementation, and testing skills.
 
@@ -59,9 +63,8 @@ assumptions and their proof or unresolved gaps; keep routine assessments brief.
 Give readable findings
 first; raw traces and archives are supporting material.
 
-Attach UI captures or a readable nonvisual verification report to the PR with
-gh --attach and confirm rendering. Keep media out of the repo. Preserve files
-and report any delivery failure.
+Use [pr-presentation](../pr-presentation/SKILL.md) for the PR title, description,
+review-relevant technical details, supporting comments, and evidence attachments.
 
 For readability changes, show an existing diff link and a representative
 before/after when useful.
