@@ -18,6 +18,10 @@ blocker and decision needed; continue independent work where possible.
 
 ## Start
 
+Before implementation, identify one concrete acceptance case: the relevant
+environment/revision, user action, and observable result that proves the
+request is satisfied.
+
 Read repository guidance, relevant code, acceptance criteria, and tests.
 Explain how the plan and evidence prove the requested outcome before substantial
 work. Identify likely affected domains and contracts to guide focused tests.
@@ -51,6 +55,8 @@ Use relevant project setup, implementation, and testing skills.
    unchanged. Use project browser-testing guidance when needed.
 5. Capture evidence from the final result: screenshots, recordings, or actual
    inputs and outputs. For bugs, compare the reproduction before and after.
+   Run that acceptance case against the submitted revision before handoff.
+   Passing other checks does not replace it; report any gap explicitly.
 
 Complete authorized commit, push, and PR stages after verification and evidence.
 Register the PR with the host when supported. Avoid unrelated cleanup and
