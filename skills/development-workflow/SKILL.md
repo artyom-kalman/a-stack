@@ -18,11 +18,19 @@ blocker and decision needed; continue independent work where possible.
 
 ## Start
 
+Before substantial work, state the intended outcome, task mode, and observable
+completion condition. Infer these from context; ask only when ambiguity changes
+scope. Completing an experiment does not imply the product goal is complete.
+
 Before implementation, identify one concrete acceptance case: the relevant
-environment/revision, user action, and observable result that proves the
-request is satisfied.
+client, environment/revision, user action, and observable result that proves
+the request is satisfied.
 
 Read repository guidance, relevant code, acceptance criteria, and tests.
+Identify relevant product invariants. Distinguish intended behavior from current
+implementation restrictions; do not treat existing limitations as requirements.
+Record consequential decisions in the tracked issue before implementation.
+
 Explain how the plan and evidence prove the requested outcome before substantial
 work. Identify likely affected domains and contracts to guide focused tests.
 Flag consequential assumptions or substitutions. For bugs, reproduce
@@ -55,8 +63,12 @@ Use relevant project setup, implementation, and testing skills.
    unchanged. Use project browser-testing guidance when needed.
 5. Capture evidence from the final result: screenshots, recordings, or actual
    inputs and outputs. For bugs, compare the reproduction before and after.
-   Run that acceptance case against the submitted revision before handoff.
-   Passing other checks does not replace it; report any gap explicitly.
+   Run that acceptance case through the relevant client and integration boundary
+   on the submitted revision before handoff. Handler tests alone do not prove MCP
+   client behavior; fixtures alone do not prove live persistence or streaming.
+   Use relevant project MCP and browser-testing guidance for those checks.
+   Report the tested path and remaining gaps before calling work complete.
+   Passing other checks does not replace acceptance evidence.
 
 Complete authorized commit, push, and PR stages after verification and evidence.
 Register the PR with the host when supported. Avoid unrelated cleanup and
