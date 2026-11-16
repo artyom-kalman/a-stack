@@ -16,6 +16,13 @@ cleanup. For repository-wide cleanup, inventory all worktrees and local branches
 from the existing checkout; do not create another worktree for cleanup itself.
 Always preserve the primary checkout and default branch.
 
+For recurring host jobs, use a local-mode maintenance project or an existing
+primary-checkout thread so worktree provisioning cannot prevent cleanup from
+starting. A prompt cannot repair a host failure that occurs before the agent
+runs. If a fresh remote fetch fails, keep resources whose merge evidence needs
+that fetch; report the infrastructure failure and do not delete from stale refs.
+Reuse the existing scheduler instead of creating a watcher per finished task.
+
 ## Decide what stays
 
 Keep a task worktree or branch when any of these applies:

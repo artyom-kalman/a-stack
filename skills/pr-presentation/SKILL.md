@@ -53,6 +53,10 @@ Use the following sections only where useful:
   links to relevant CI/evidence, and material limitations. Keep failures, skips,
   and incomplete checks distinct from passes. Use exact commands when they make
   the result reproducible. Do not substitute test counts for behavior evidence.
+- **Independent review:** when used, name the actual reviewer model, reviewed
+  revision, score with its stated scope, findings and remaining disagreement.
+  Keep it separate from runtime verification and merge readiness. Mark visual
+  quality unassessed when the reviewer did not inspect the rendered product.
 
 Do not add a generic "How to check" section or instructions that depend on the
 author's machine, private browser session, local paths, or test account. Useful
