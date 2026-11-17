@@ -34,6 +34,8 @@ the request is satisfied.
 Read repository guidance, relevant code, acceptance criteria, and tests.
 Identify relevant product invariants. Distinguish intended behavior from current
 implementation restrictions; do not treat existing limitations as requirements.
+For suitable input-heavy or stateful logic, consider
+[property-based-testing](../property-based-testing/SKILL.md) for a focused invariant test.
 Record consequential decisions in the tracked issue before implementation.
 
 Explain how the plan and evidence prove the requested outcome before substantial
