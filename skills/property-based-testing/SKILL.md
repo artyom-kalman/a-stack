@@ -9,6 +9,11 @@ Use when the affected behavior has a clear invariant. Skip when ordinary
 examples already prove the behavior adequately. Reuse the project's test runner;
 prefer fast-check for JavaScript and TypeScript.
 
+For browser state, consider generated action sequences when interactions matter.
+Follow the project's E2E guidance for an optional Bombadil campaign; reuse its
+fixture and cleanup setup. Keep browser exploration separate from ordinary test
+runs unless the project deliberately adopts it in CI.
+
 Derive the property from intended behavior. Generate valid inputs and meaningful
 edge cases. Exercise the relevant operation: a passing escaping helper does not
 prove an export/import round trip. Bound the run cost; 1,000 cases is a starting
