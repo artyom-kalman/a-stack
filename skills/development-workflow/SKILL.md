@@ -9,10 +9,10 @@ Own the finishing steps. Respect the user's scope and stopping point.
 A bare issue reference starts investigation; implementation requests authorize
 the requested edits.
 
-Use [Full Stop](../full-stop/SKILL.md) by default for implementation requests.
-It defines the endpoint and the checks for handing over an open PR for the
-user's review. Follow an explicit different endpoint and repository contribution
-rules.
+Use [Full Stop](../full-stop/SKILL.md) to set the finish point for the task.
+For implementation, default to an open PR ready for the user's review after
+verification, required CI, and resolution of blocking review findings. Follow an
+explicit different endpoint and repository contribution rules.
 
 Merge only when requested. Explain normal deployment consequences before an
 authorized merge; follow the repository's release checks after it. Manual
@@ -22,10 +22,6 @@ Any stage can stop when evidence invalidates the next step. Explain the
 blocker and decision needed; continue independent work where possible.
 
 ## Start
-
-Before substantial work, state the intended outcome, task mode, and observable
-completion condition. Infer these from context; ask only when ambiguity changes
-scope. Completing an experiment does not imply the product goal is complete.
 
 Before implementation, identify one concrete acceptance case: the relevant
 client, environment/revision, user action, and observable result that proves
@@ -85,11 +81,12 @@ Use relevant project setup, implementation, and testing skills.
    Report the tested path and remaining gaps before calling work complete.
    Passing other checks does not replace acceptance evidence.
 
-Complete authorized commit and push stages after verification. Use
-[Open PR](../open-pr/SKILL.md) to file the PR or update the existing one. Own
-checks and relevant review findings through the agreed endpoint. Fix confirmed
-task-related failures and conflicts. Inspect infrastructure failures before
-retrying. Keep scope bounded.
+Complete authorized commit and push stages after verification. If an existing PR
+is meant for the user's merge decision, confirm auto-merge is off and there is
+no active merge queue entry before pushing. Use [Open PR](../open-pr/SKILL.md)
+to file or update the PR. Own checks and relevant review findings through the
+agreed endpoint. Fix confirmed task-related failures and conflicts. Inspect
+infrastructure failures before retrying. Keep scope bounded.
 Reuse passing evidence unless changed inputs or unresolved concerns invalidate it.
 
 When checks or reviews are pending, use the host's PR watcher and resume on its
@@ -97,10 +94,17 @@ events. In T3 Code, handle existing findings, call watch_pull_request, and end
 the turn. Only the owning parent watches. Unwatch before a ready/blocked handoff
 or a question; do not leave an idle polling loop. A wake is not merge approval.
 
-Use [Full Stop's handoff checks](../full-stop/SKILL.md#hand-off-the-pr) when
-delivering a PR for the user's review.
-
 ## Deliver
+
+For a PR handoff, check the live head and base. Confirm that acceptance evidence
+covers the submitted behavior and recheck it after relevant changes. Report the
+PR link, final head, and actual state.
+
+- **Ready for review** when the PR is open, out of draft, and mergeable by the
+  user, with required checks passed and blocking findings resolved.
+- **Waiting for required approval** when human approval is the only remaining gate.
+- **Blocked** when progress depends on a missing prerequisite or decision. Say
+  what is needed.
 
 For an explicitly early draft, state what remains. Keep reviewer assessment
 separate from verification. Name the reviewed revision, model, score or

@@ -1,38 +1,25 @@
 ---
 name: full-stop
-description: Finish implementation with an open pull request ready for the user's review. Use by default for implementation and when the user requests Full Stop.
+description: Define and reach the finish point for a task. Use before substantial research, bug investigation, or implementation, and when the user asks for Full Stop.
 ---
 
 # Full Stop
 
-Take the requested work through verification, review, commit, push, and PR
-follow-through. Leave the PR open for the user's merge decision. State the
-endpoint and observable acceptance case before substantial work.
+Before substantial work, state the requested outcome, the deliverable, and the
+evidence that will show the task is done. Use the user's stated finish point or
+the default from the task's workflow. Ask only when choosing an endpoint would
+change the scope or require authorization the user has not given.
 
-Use this endpoint for ordinary implementation. Honor a different endpoint the
-user specifies, such as investigation only, local edits, a demo before
-publication, or an early draft. Follow repository rules and the host's
-authorization requirements.
+- **Research.** Answer the question with supporting sources and name any
+  uncertainty that affects the answer.
+- **Bug investigation.** Report the reproduction, observed behavior, and cause
+  if the evidence establishes it. If reproduction fails, say what you tried and
+  what evidence would let you continue. Keep the work within the requested scope.
+- **Implementation.** Verify the requested behavior and use the delivery
+  endpoint from the development workflow or the user's instructions.
 
-Use the remaining stages of [development-workflow](../development-workflow/SKILL.md)
-to get there. Before pushing to an existing PR, confirm it has no auto-merge
-or active merge queue entry.
+Continue until the finish condition is met or a specific blocker prevents
+further progress. Hand back the deliverable and its evidence. If blocked,
+report what is complete, what remains, and the missing prerequisite or decision.
 
-## Hand off the PR
-
-Check the live PR's current head and base. Confirm the PR is open, ready for
-review, and left for manual merge. Confirm acceptance evidence covers the
-submitted behavior, required checks have passed, and blocking findings and
-conflicts are resolved. Recheck affected evidence after a behavior change.
-
-Report the PR link, final head, evidence, and the actual handoff state:
-
-- **Ready for review** when proof and required checks pass and the PR is mergeable.
-- **Waiting for required approval** when a human approval is the remaining gate.
-- **Blocked** when progress needs a missing prerequisite or decision. State the
-  specific blocker and next action.
-
-When required checks or reviews are still pending, follow the development
-workflow's PR watcher instructions.
-
-Adapted from [Theo Browne's Full Stop](https://github.com/t3dotgg/tstack/blob/main/skills/full-stop/SKILL.md).
+The name comes from [Theo Browne's Full Stop](https://github.com/t3dotgg/tstack/blob/main/skills/full-stop/SKILL.md).
