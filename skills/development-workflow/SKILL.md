@@ -48,9 +48,8 @@ that existing context and authorization do not settle.
 For paid evaluations, state cases, candidates, scoring criteria, and estimated
 spend before bulk runs.
 
-For PR delivery, read [pr-presentation](../pr-presentation/SKILL.md) before
-verification so useful screenshots and recordings are captured during actual
-checks.
+For PR delivery, read [Open PR](../open-pr/SKILL.md) before verification so you
+can capture evidence during the checks.
 
 Implement changes in an isolated environment using a worktree from `main`.
 Use relevant project setup, implementation, and testing skills.
@@ -86,10 +85,11 @@ Use relevant project setup, implementation, and testing skills.
    Report the tested path and remaining gaps before calling work complete.
    Passing other checks does not replace acceptance evidence.
 
-Complete authorized commit, push, and PR stages after verification and evidence.
-Register the PR with the host when supported. Own checks and relevant review
-findings through the agreed endpoint; fix confirmed task-related failures and
-conflicts. Inspect infrastructure failures before retrying. Keep scope bounded.
+Complete authorized commit and push stages after verification. Use
+[Open PR](../open-pr/SKILL.md) to file the PR or update the existing one. Own
+checks and relevant review findings through the agreed endpoint. Fix confirmed
+task-related failures and conflicts. Inspect infrastructure failures before
+retrying. Keep scope bounded.
 Reuse passing evidence unless changed inputs or unresolved concerns invalidate it.
 
 When checks or reviews are pending, use the host's PR watcher and resume on its
@@ -111,9 +111,6 @@ Show the result, evidence, checks, and gaps in chat. Include material safety
 assumptions and their proof or unresolved gaps; keep routine assessments brief.
 Give readable findings
 first; raw traces and archives are supporting material.
-
-Use [pr-presentation](../pr-presentation/SKILL.md) for the PR title, description,
-review-relevant technical details, supporting comments, and evidence attachments.
 
 For readability changes, show an existing diff link and a representative
 before/after when useful.

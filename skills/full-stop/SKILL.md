@@ -15,9 +15,8 @@ publication, or an early draft. Follow repository rules and the host's
 authorization requirements.
 
 Use the remaining stages of [development-workflow](../development-workflow/SKILL.md)
-to get there. Reuse an existing task PR when one exists. Before pushing to it,
-confirm it has no auto-merge or active merge queue entry. Open the PR ready for
-review and own required CI and blocking review findings through handoff.
+to get there. Before pushing to an existing PR, confirm it has no auto-merge
+or active merge queue entry.
 
 ## Hand off the PR
 
