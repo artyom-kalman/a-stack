@@ -9,10 +9,10 @@ Own the finishing steps. Respect the user's scope and stopping point.
 A bare issue reference starts investigation; implementation requests authorize
 the requested edits.
 
-An implementation request includes verification, commit, push, PR creation,
-CI follow-through, and a merge-ready handoff. Honor an explicit narrower scope,
-such as local-only, no commit, or an early draft. A draft PR is an intermediate
-result, not the completion condition. Existing repository contribution rules apply.
+Use [Full Stop](../full-stop/SKILL.md) by default for implementation requests.
+It defines the endpoint and the checks for handing over an open PR for the
+user's review. Follow an explicit different endpoint and repository contribution
+rules.
 
 Merge only when requested. Explain normal deployment consequences before an
 authorized merge; follow the repository's release checks after it. Manual
@@ -97,19 +97,15 @@ events. In T3 Code, handle existing findings, call watch_pull_request, and end
 the turn. Only the owning parent watches. Unwatch before a ready/blocked handoff
 or a question; do not leave an idle polling loop. A wake is not merge approval.
 
-Call a PR merge-ready only when proof covers its current behavior, required
-checks pass, blocking findings are resolved, and its current base/head are
-mergeable. If only required human approval remains, state that exact condition.
-A failed or unavailable acceptance journey remains a gap; fix task-owned setup
-or report the concrete blocker instead of calling the feature complete.
+Use [Full Stop's handoff checks](../full-stop/SKILL.md#hand-off-the-pr) when
+delivering a PR for the user's review.
 
 ## Deliver
 
-Report delivery state as ready for merge, waiting for required human approval,
-or blocked. For an explicitly early draft, state what remains. Keep reviewer
-assessment separate from verification: name the reviewed revision, model,
-score/findings if any, actual client journeys and outcomes, and untested paths.
-A high review score does not establish runtime behavior.
+For an explicitly early draft, state what remains. Keep reviewer assessment
+separate from verification. Name the reviewed revision, model, score or
+findings, actual client journeys and outcomes, and untested paths. A high
+review score does not establish runtime behavior.
 
 Show the result, evidence, checks, and gaps in chat. Include material safety
 assumptions and their proof or unresolved gaps; keep routine assessments brief.
