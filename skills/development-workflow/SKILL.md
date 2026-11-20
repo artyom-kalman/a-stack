@@ -9,10 +9,10 @@ Own the finishing steps. Respect the user's scope and stopping point.
 A bare issue reference starts investigation; implementation requests authorize
 the requested edits.
 
-An implementation request includes verification, commit, push, PR creation,
-CI follow-through, and a merge-ready handoff. Honor an explicit narrower scope,
-such as local-only, no commit, or an early draft. A draft PR is an intermediate
-result, not the completion condition. Existing repository contribution rules apply.
+Use [Full Stop](../full-stop/SKILL.md) to set the finish point for the task.
+For implementation, default to an open PR ready for the user's review after
+verification, required CI, and resolution of blocking review findings. Follow an
+explicit different endpoint and repository contribution rules.
 
 Merge only when requested. Explain normal deployment consequences before an
 authorized merge; follow the repository's release checks after it. Manual
@@ -22,10 +22,6 @@ Any stage can stop when evidence invalidates the next step. Explain the
 blocker and decision needed; continue independent work where possible.
 
 ## Start
-
-Before substantial work, state the intended outcome, task mode, and observable
-completion condition. Infer these from context; ask only when ambiguity changes
-scope. Completing an experiment does not imply the product goal is complete.
 
 Before implementation, identify one concrete acceptance case: the relevant
 client, environment/revision, user action, and observable result that proves
@@ -48,9 +44,8 @@ that existing context and authorization do not settle.
 For paid evaluations, state cases, candidates, scoring criteria, and estimated
 spend before bulk runs.
 
-For PR delivery, read [pr-presentation](../pr-presentation/SKILL.md) before
-verification so useful screenshots and recordings are captured during actual
-checks.
+For PR delivery, read [Open PR](../open-pr/SKILL.md) before verification so you
+can capture evidence during the checks.
 
 Implement changes in an isolated environment using a worktree from `main`.
 Use relevant project setup, implementation, and testing skills.
@@ -86,10 +81,12 @@ Use relevant project setup, implementation, and testing skills.
    Report the tested path and remaining gaps before calling work complete.
    Passing other checks does not replace acceptance evidence.
 
-Complete authorized commit, push, and PR stages after verification and evidence.
-Register the PR with the host when supported. Own checks and relevant review
-findings through the agreed endpoint; fix confirmed task-related failures and
-conflicts. Inspect infrastructure failures before retrying. Keep scope bounded.
+Complete authorized commit and push stages after verification. If an existing PR
+is meant for the user's merge decision, confirm auto-merge is off and there is
+no active merge queue entry before pushing. Use [Open PR](../open-pr/SKILL.md)
+to file or update the PR. Own checks and relevant review findings through the
+agreed endpoint. Fix confirmed task-related failures and conflicts. Inspect
+infrastructure failures before retrying. Keep scope bounded.
 Reuse passing evidence unless changed inputs or unresolved concerns invalidate it.
 
 When checks or reviews are pending, use the host's PR watcher and resume on its
@@ -97,27 +94,27 @@ events. In T3 Code, handle existing findings, call watch_pull_request, and end
 the turn. Only the owning parent watches. Unwatch before a ready/blocked handoff
 or a question; do not leave an idle polling loop. A wake is not merge approval.
 
-Call a PR merge-ready only when proof covers its current behavior, required
-checks pass, blocking findings are resolved, and its current base/head are
-mergeable. If only required human approval remains, state that exact condition.
-A failed or unavailable acceptance journey remains a gap; fix task-owned setup
-or report the concrete blocker instead of calling the feature complete.
-
 ## Deliver
 
-Report delivery state as ready for merge, waiting for required human approval,
-or blocked. For an explicitly early draft, state what remains. Keep reviewer
-assessment separate from verification: name the reviewed revision, model,
-score/findings if any, actual client journeys and outcomes, and untested paths.
-A high review score does not establish runtime behavior.
+For a PR handoff, check the live head and base. Confirm that acceptance evidence
+covers the submitted behavior and recheck it after relevant changes. Report the
+PR link, final head, and actual state.
+
+- **Ready for review** when the PR is open, out of draft, and mergeable by the
+  user, with required checks passed and blocking findings resolved.
+- **Waiting for required approval** when human approval is the only remaining gate.
+- **Blocked** when progress depends on a missing prerequisite or decision. Say
+  what is needed.
+
+For an explicitly early draft, state what remains. Keep reviewer assessment
+separate from verification. Name the reviewed revision, model, score or
+findings, actual client journeys and outcomes, and untested paths. A high
+review score does not establish runtime behavior.
 
 Show the result, evidence, checks, and gaps in chat. Include material safety
 assumptions and their proof or unresolved gaps; keep routine assessments brief.
 Give readable findings
 first; raw traces and archives are supporting material.
-
-Use [pr-presentation](../pr-presentation/SKILL.md) for the PR title, description,
-review-relevant technical details, supporting comments, and evidence attachments.
 
 For readability changes, show an existing diff link and a representative
 before/after when useful.
