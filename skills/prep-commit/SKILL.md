@@ -11,8 +11,10 @@ argument-hint: "and push | and pr | don't commit"
 
 Review, then commit.
 
-Invoking this skill is the commit request. Push and PR are not. Those
-happen only when the user asks in the same message.
+A standalone invocation authorizes review and commit by default. For any
+additional delivery, follow the requested endpoint and authorization already
+established in the session. [Development workflow](../development-workflow/SKILL.md)
+owns the endpoint for implementation tasks.
 
 `review-diff` and `summarize-changes` are standalone skills. This skill
 runs them in order, then commits.
@@ -24,8 +26,7 @@ Prep commit progress:
 - [ ] Review (review-diff)
 - [ ] Commit message (summarize-changes), only if safe
 - [ ] Commit
-- [ ] Push, only if the user asked
-- [ ] Open a PR, only if the user asked
+- [ ] Hand off any authorized push or PR
 ```
 
 ## 1. Review
@@ -51,20 +52,15 @@ Present the review report first, then the commit message.
 If the user said "don't commit" or "review only", stop after the message.
 Otherwise continue to section 3. Do not stop after the message.
 
-## 3. Commit, then push/PR on request
+## 3. Commit and hand off
 
 If the user said "don't commit" or "review only", stop after section 2.
 
 Commit.
 
-If they said "and push" or "then push", push after the commit.
+For an authorized push-only request, push after the commit. For authorized
+PR delivery, hand off to [Open PR](../open-pr/SKILL.md). PR delivery requires an
+existing task branch.
 
-If they said "and pr", "open a pr", or "then pr", push, then open a PR
-unless one is already open. Follow the user's PR rules. If HEAD is the
-default branch (`main`, `master`, or whatever `origin/HEAD` points at),
-do not open a PR.
-
-Do not create a branch.
-Do not commit when the verdict is not safe.
-Do not push or open a PR unless the user asked.
+Do not create a branch in this skill.
 Do not force-push, amend, or skip hooks unless the user asked.
