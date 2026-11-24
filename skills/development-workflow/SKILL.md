@@ -5,14 +5,13 @@ description: Carry implementation through task setup, review, verification, PR d
 
 # Development workflow
 
-Own the finishing steps. Respect the user's scope and stopping point.
-A bare issue reference starts investigation; implementation requests authorize
-the requested edits.
+Own the implementation from the agreed goal through handoff. A bare issue
+reference starts investigation.
 
-Use [Full Stop](../full-stop/SKILL.md) to set the finish point for the task.
-For implementation, default to an open PR ready for the user's review after
-verification, required CI, and resolution of blocking review findings. Follow an
-explicit different endpoint and repository contribution rules.
+At kickoff, use [Full Stop](../full-stop/SKILL.md) to state the outcome, the
+handoff, and the evidence that will prove it. For implementation, the default
+handoff is a review-ready PR that a teammate can read quickly and verify.
+Honor any explicit stopping point and repository contribution rules.
 
 Merge only when requested. Explain normal deployment consequences before an
 authorized merge; follow the repository's release checks after it. Manual
@@ -23,9 +22,13 @@ blocker and decision needed; continue independent work where possible.
 
 ## Start
 
-Before implementation, identify one concrete acceptance case: the relevant
-client, environment/revision, user action, and observable result that proves
-the request is satisfied.
+Before implementation, identify one concrete acceptance case. Name the client,
+environment or revision, user action, and expected observable result.
+
+For PR delivery, read [Open PR](../open-pr/SKILL.md) at kickoff and plan evidence
+as part of that acceptance case. Confirm the destination and check what the
+session already authorizes for pushing, opening the PR, and publishing evidence.
+Surface any known authorization gap early.
 
 Read repository guidance, relevant code, acceptance criteria, and tests.
 Identify relevant product invariants. Distinguish intended behavior from current
@@ -44,11 +47,10 @@ that existing context and authorization do not settle.
 For paid evaluations, state cases, candidates, scoring criteria, and estimated
 spend before bulk runs.
 
-For PR delivery, read [Open PR](../open-pr/SKILL.md) before verification so you
-can capture evidence during the checks.
-
 Implement changes in an isolated environment using a worktree from `main`.
-Use relevant project setup, implementation, and testing skills.
+When delivering through T3 Code, attach the thread to the task worktree and
+confirm its branch against the intended PR head. Use relevant project setup,
+implementation, and testing skills.
 
 ## Build and verify
 
@@ -57,10 +59,9 @@ Use relevant project setup, implementation, and testing skills.
    Review every added comment, including test comments. Remove comments that
    restate readable code. Keep comments only when they add non-obvious reasons,
    constraints, or external facts.
-3. Review the final diff for correctness and readability. Use prep-commit's
-   review stage when committing; otherwise use review-diff or review directly.
-   Fix confirmed correctness
-   issues and maintainability problems introduced by the change.
+3. Use [review-diff](../review-diff/SKILL.md) for a diff-only review or the
+   `review` skill for substantive closeout. Fix confirmed correctness and
+   maintainability problems introduced by the change.
    Use [independent-review](../independent-review/SKILL.md) when requested or
    when a substantial UI/readability change, consequential auth/persistence/
    integration boundary, or unresolved repeated failure warrants fresh judgment.
@@ -72,10 +73,9 @@ Use relevant project setup, implementation, and testing skills.
    After review fixes, update the assessment when impact changes and recheck
    affected behavior. Reuse passing evidence while its relevant inputs remain
    unchanged. Use project browser-testing guidance when needed.
-5. Capture evidence from the final result: screenshots, recordings, or actual
-   inputs and outputs. For bugs, compare the reproduction before and after.
-   Run that acceptance case through the relevant client and integration boundary
-   on the submitted revision before handoff. Handler tests alone do not prove MCP
+5. Run the acceptance case through the relevant client and integration boundary
+   on the submitted revision. Capture the planned evidence during the check.
+   For bugs, compare the reproduction before and after. Handler tests alone do not prove MCP
    client behavior; fixtures alone do not prove live persistence or streaming.
    Use relevant project MCP and browser-testing guidance for those checks.
    Report the tested path and remaining gaps before calling work complete.
@@ -96,17 +96,18 @@ or a question; do not leave an idle polling loop. A wake is not merge approval.
 
 ## Deliver
 
-For a PR handoff, check the live head and base. Confirm that acceptance evidence
-covers the submitted behavior and recheck it after relevant changes. Report the
-PR link, final head, and actual state.
+Report the PR link, final head, and actual state. When relevant behavior
+changes after verification, recheck it and update the evidence.
 
-- **Ready for review** when the PR is open, out of draft, and mergeable by the
-  user, with required checks passed and blocking findings resolved.
+- **Ready for review** when the PR is open and out of draft, its description
+  explains the change and how to verify it, the published evidence covers the
+  submitted behavior, required checks passed, blocking findings are resolved,
+  and the PR is mergeable by the user.
 - **Waiting for required approval** when human approval is the only remaining gate.
 - **Blocked** when progress depends on a missing prerequisite or decision. Say
   what is needed.
 
-For an explicitly early draft, state what remains. Keep reviewer assessment
+For a draft, state what remains. Keep reviewer assessment
 separate from verification. Name the reviewed revision, model, score or
 findings, actual client journeys and outcomes, and untested paths. A high
 review score does not establish runtime behavior.
