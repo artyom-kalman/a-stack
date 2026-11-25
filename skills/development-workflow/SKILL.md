@@ -8,10 +8,16 @@ description: Carry implementation through task setup, review, verification, PR d
 Own the implementation from the agreed goal through handoff. A bare issue
 reference starts investigation.
 
+## Before you end the turn
+
+- For implementation, open or update the PR before handing back. Include its
+  URL and verification status.
+- If verification evidence is pending, publish a draft and state what remains.
+- Stop at local changes only when the user explicitly asks for a local handoff
+  or a specific blocker prevents publication. State the blocker if there is one.
+
 At kickoff, use [Full Stop](../full-stop/SKILL.md) to state the outcome, the
-handoff, and the evidence that will prove it. For implementation, the default
-handoff is a review-ready PR that a teammate can read quickly and verify.
-Honor any explicit stopping point and repository contribution rules.
+handoff, and the evidence that will prove it. Honor repository contribution rules.
 
 Merge only when requested. Explain normal deployment consequences before an
 authorized merge; follow the repository's release checks after it. Manual
