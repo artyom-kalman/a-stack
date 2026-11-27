@@ -18,6 +18,21 @@ recording when the action or transition matters. Label fixture data, mocked
 services, and before/after states when they affect interpretation. For nonvisual
 work, retain relevant test output, input and output examples, or logs.
 
+For database schema changes, include a **Database schema diff** in the PR body.
+Use a side-by-side before/after table for the affected schema against the PR
+base. Highlight changed fields, types, optionality, and indexes. Add a small ERD when
+relationships change. Explain what happens to existing records and whether a
+migration or backfill is needed.
+
+For changes to MCP behavior, exercise the changed journey through the intended
+client or host against the submitted revision in a test environment. Use the
+project's live MCP testing guidance when available. Include a **Live MCP
+verification** section in the PR body with the tested commit, host, environment,
+transport, tool calls and observed outcomes, and links to sanitized evidence.
+Report SDK-only checks as integration evidence and identify mocked dependencies.
+If the intended host could not be tested, state the specific blocker and behavior
+still unverified.
+
 Reuse captures that still cover the submitted behavior. Plan to collect new
 media during the acceptance check. Use synthetic or approved data for published
 captures.
